@@ -106,34 +106,26 @@ export async function createParticipant(name: string, collegeName: string): Prom
     total_completed: 0,
   };
 
+  // Serverless deployments have a read-only application filesystem. When
+  // Supabase is configured, it is the only persistent store.
+  if (supabase) {
+    const { data, error } = await supabase.from('participants').insert([newParticipant]).select().single();
+    if (error) throw new Error('Unable to create participant record.');
+    return (data || newParticipant) as Participant;
+  }
+
   const locals = getLocalParticipants();
   locals.push(newParticipant);
   saveLocalParticipants(locals);
-
-  if (supabase) {
-    try {
-      const { error } = await supabase.from('participants').insert([newParticipant]);
-      if (error) {
-        console.warn('Supabase insert participant warning:', error.message);
-      }
-    } catch (err) {
-      console.warn('Supabase exception:', err);
-    }
-  }
 
   return newParticipant;
 }
 
 export async function getParticipant(id: string): Promise<Participant | null> {
   if (supabase) {
-    try {
-      const { data, error } = await supabase.from('participants').select('*').eq('id', id).single();
-      if (!error && data) {
-        return data as Participant;
-      }
-    } catch {
-      // Fallback
-    }
+    const { data, error } = await supabase.from('participants').select('*').eq('id', id).maybeSingle();
+    if (error) throw new Error('Unable to load participant record.');
+    return data as Participant | null;
   }
 
   const locals = getLocalParticipants();
@@ -145,6 +137,17 @@ export async function updateParticipantLevel1(
   websiteUrl: string,
   completedAt: string
 ): Promise<Participant | null> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('participants')
+      .update({ level1_completed: true, level1_url: websiteUrl, level1_completed_at: completedAt, total_completed: 1 })
+      .eq('id', userId)
+      .select()
+      .single();
+    if (error) throw new Error('Unable to save round completion.');
+    return data as Participant;
+  }
+
   const locals = getLocalParticipants();
   const index = locals.findIndex(p => p.id === userId);
   let updatedItem: Participant | null = null;
@@ -162,28 +165,6 @@ export async function updateParticipantLevel1(
     updatedItem = locals[index];
   }
 
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('participants')
-        .update({
-          level1_completed: true,
-          level1_url: websiteUrl,
-          level1_completed_at: completedAt,
-          total_completed: updatedItem?.total_completed || 1
-        })
-        .eq('id', userId)
-        .select()
-        .single();
-
-      if (!error && data) {
-        return data as Participant;
-      }
-    } catch (err) {
-      console.warn('Supabase level1 update warning:', err);
-    }
-  }
-
   return updatedItem;
 }
 
@@ -192,6 +173,17 @@ export async function updateParticipantLevel2(
   imageUrl: string,
   completedAt: string
 ): Promise<Participant | null> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('participants')
+      .update({ level2_completed: true, level2_completed_at: completedAt, total_completed: 2 })
+      .eq('id', userId)
+      .select()
+      .single();
+    if (error) throw new Error('Unable to save round completion.');
+    return data as Participant;
+  }
+
   const locals = getLocalParticipants();
   const index = locals.findIndex(p => p.id === userId);
   let updatedItem: Participant | null = null;
@@ -207,27 +199,6 @@ export async function updateParticipantLevel2(
     updatedItem = locals[index];
   }
 
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('participants')
-        .update({
-          level2_completed: true,
-          level2_completed_at: completedAt,
-          total_completed: 2
-        })
-        .eq('id', userId)
-        .select()
-        .single();
-
-      if (!error && data) {
-        return data as Participant;
-      }
-    } catch (err) {
-      console.warn('Supabase level2 update warning:', err);
-    }
-  }
-
   return updatedItem;
 }
 
@@ -238,20 +209,15 @@ export async function addVerificationLog(log: Omit<VerificationLog, 'id' | 'crea
     created_at: new Date().toISOString(),
   };
 
+  if (supabase) {
+    const { error } = await supabase.from('verification_logs').insert([newLog]);
+    if (error) throw new Error('Unable to save verification record.');
+    return newLog;
+  }
+
   const logs = getLocalLogs();
   logs.unshift(newLog);
   saveLocalLogs(logs);
-
-  if (supabase) {
-    try {
-      const { error } = await supabase.from('verification_logs').insert([newLog]);
-      if (error) {
-        console.warn('Supabase log insert warning:', error.message);
-      }
-    } catch (err) {
-      console.warn('Supabase log insert exception:', err);
-    }
-  }
 
   return newLog;
 }
@@ -260,21 +226,13 @@ export async function getLeaderboard(): Promise<Participant[]> {
   let list: Participant[] = [];
 
   if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('participants')
-        .select('*')
-        .order('total_completed', { ascending: false })
-        .order('level2_completed_at', { ascending: true, nullsFirst: false })
-        .order('level1_completed_at', { ascending: true, nullsFirst: false })
-        .order('registered_at', { ascending: true });
-
-      if (!error && data && data.length > 0) {
-        return data as Participant[];
-      }
-    } catch (err) {
-      console.warn('Supabase leaderboard fetch warning:', err);
-    }
+    const { data, error } = await supabase
+      .from('participants').select('*').order('total_completed', { ascending: false })
+      .order('level2_completed_at', { ascending: true, nullsFirst: false })
+      .order('level1_completed_at', { ascending: true, nullsFirst: false })
+      .order('registered_at', { ascending: true });
+    if (error) throw new Error('Unable to load leaderboard.');
+    return (data || []) as Participant[];
   }
 
   list = getLocalParticipants();
@@ -307,19 +265,11 @@ export async function getLeaderboard(): Promise<Participant[]> {
 
 export async function getUserLogs(userId: string): Promise<VerificationLog[]> {
   if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from('verification_logs')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        return data as VerificationLog[];
-      }
-    } catch {
-      // Fallback
-    }
+    const { data, error } = await supabase
+      .from('verification_logs').select('*').eq('user_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error('Unable to load verification history.');
+    return (data || []) as VerificationLog[];
   }
 
   const logs = getLocalLogs();
