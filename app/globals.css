@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #eeece5;
+  --foreground: #11110f;
+  --paper: #f6f4ef;
+  --ink: #11110f;
+  --muted: #6e6a61;
+  --line: #cfcac0;
+  --signal: #c83227;
 }
 
 @theme inline {
@@ -12,15 +17,44 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
 }
+
+* { border-color: var(--line); }
+.editorial-page { background: var(--background); color: var(--ink); min-height: 100vh; }
+.editorial-shell { width: min(1280px, 100%); margin: 0 auto; padding: 0 24px; }
+.editorial-kicker { color: var(--signal); font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.editorial-display { font-family: Impact, "Arial Narrow", var(--font-geist-sans), sans-serif; font-stretch: condensed; font-weight: 900; letter-spacing: -.025em; line-height: .9; text-transform: uppercase; }
+.editorial-rule { border-color: var(--line); }
+.editorial-button { align-items: center; background: var(--ink); color: white; display: inline-flex; font-size: 11px; font-weight: 800; gap: 8px; letter-spacing: .08em; padding: 13px 18px; text-transform: uppercase; transition: background .2s ease, transform .2s ease; }
+.editorial-button:hover { background: var(--signal); transform: translateY(-1px); }
+.editorial-button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+.editorial-button--light { background: transparent; border: 1px solid var(--ink); color: var(--ink); }
+.editorial-button--light:hover { background: var(--ink); color: white; }
+.editorial-input { background: transparent; border: 0; border-bottom: 1px solid var(--ink); border-radius: 0; color: var(--ink); font-size: 16px; outline: none; padding: 14px 0; width: 100%; }
+.editorial-input::placeholder { color: #99958c; }
+.editorial-input:focus { border-color: var(--signal); }
+.editorial-panel { background: var(--paper); border: 1px solid var(--line); }
+.editorial-number { color: var(--ink); font-family: Impact, "Arial Narrow", sans-serif; font-size: clamp(52px, 8vw, 110px); letter-spacing: -.07em; line-height: .75; }
+.red-mark { color: var(--signal); }
+@media (max-width: 640px) { .editorial-shell { padding: 0 16px; } .editorial-display { letter-spacing: -.04em; } }
+
+/* Re-skin the existing interaction components as one calm editorial system. */
+.editorial-page [class*="bg-slate-950"], .editorial-page [class*="bg-slate-900"] { background-color: var(--paper) !important; }
+.editorial-page [class*="text-white"], .editorial-page [class*="text-slate-"] { color: var(--ink) !important; }
+.editorial-page [class*="border-slate"], .editorial-page [class*="border-cyan"], .editorial-page [class*="border-indigo"] { border-color: var(--line) !important; }
+.editorial-page [class*="rounded-"] { border-radius: 0 !important; }
+.editorial-page [class*="text-cyan"], .editorial-page [class*="text-indigo"] { color: var(--signal) !important; }
+.editorial-page [class*="bg-cyan"], .editorial-page [class*="bg-indigo"] { background-color: transparent !important; }
+.editorial-page input { color: var(--ink) !important; }
+.editorial-page input::placeholder { color: #99958c !important; }
+.editorial-page .shadow-xl, .editorial-page .shadow-2xl, .editorial-page .shadow-lg { box-shadow: none !important; }
+.editorial-page .level-workbench > div:first-child { border: 1px solid var(--line) !important; background: var(--paper) !important; }
+.editorial-page .level-workbench > div:first-child h2 { color: var(--ink) !important; font-family: Impact, "Arial Narrow", sans-serif; font-size: clamp(42px, 6vw, 76px); letter-spacing: -.025em; line-height: .9; }
+.editorial-page .level-workbench .lg\:col-span-5 { display: none; }
+.editorial-page .level-workbench .lg\:col-span-7 { grid-column: 1 / -1; max-width: 760px; }
+.editorial-page .level-workbench button[type="submit"] { background: var(--ink) !important; color: white !important; border-radius: 0 !important; }
+.editorial-page .level-workbench button[type="submit"]:hover { background: var(--signal) !important; }
