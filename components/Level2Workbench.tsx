@@ -163,9 +163,10 @@ export default function Level2Workbench({
           <p className="mt-2 text-sm text-slate-300 leading-relaxed">
             Share the public link to the requested image. Use the supplied reference as your guide.
           </p>
-          <p className="mt-5 max-w-3xl border-l-2 border-red-700 pl-4 text-sm leading-6 text-stone-600">
-            Your task is to make the supplied reference asset available through a public link. Place the exact requested file in the destination prepared for this round. Confirm that the link opens directly in a browser without requiring a sign-in. Take care not to alter the source asset while moving it between services. Keep the final URL tidy and ready to share. Review the reference one final time before submission. When everything is in place, submit the public image link below.
-          </p>
+          <div className="mt-5 max-w-3xl border-l-2 border-red-700 pl-4 text-sm leading-6 text-stone-600 space-y-4">
+            <p>The MLSC club is preparing for a new season of workshops, campus events, and student-led projects across India. Its identity needs to travel with every announcement, event page, and community initiative, so the club has decided that its official logo should be available from a dependable public location. The design team has finished the artwork, but the club needs a technically sound way to distribute the original asset at scale. They have asked you to take responsibility for the final publishing step. Your role is to make sure the logo can be reached cleanly by anyone who receives its link.</p>
+            <p>First download the official image from the <a className="font-semibold text-red-700 underline underline-offset-2" href="https://yrzpapmgpqpjofbhycbw.supabase.co/storage/v1/object/public/ctf-assets/MLSC%20LOGO.jpeg" target="_blank" rel="noreferrer">MLSC asset library</a>. Then upload that exact file to Azure Blob Storage and make it publicly accessible. Do not edit, recompress, rename through a conversion tool, or replace the supplied logo with a lookalike; the club needs the original asset preserved as it was issued. Confirm that the final blob URL opens directly in a browser with no account or portal sign-in required. Imagine this link being placed in a national campaign where thousands of people may access it from different devices. Once the original file is live, paste the public Azure Blob image URL below.</p>
+          </div>
 
           {/* Verification Status Badge */}
           {participant.level2_completed && (

@@ -157,9 +157,10 @@ export default function Level1Workbench({
           <p className="mt-2 text-sm text-slate-300 leading-relaxed">
             Share a public link to your page. It should include the two required elements below.
           </p>
-          <p className="mt-5 max-w-3xl border-l-2 border-red-700 pl-4 text-sm leading-6 text-stone-600">
-            Your task is to publish a simple public webpage for this round. Create a page that feels intentional and complete, rather than a bare test page. Include a clear opening section that introduces the page to a visitor. Add the required markup in the correct place within your page structure. The content and visual direction are yours to decide. Make sure the final link is publicly reachable before you submit it. Once you are satisfied with the result, submit the live URL below.
-          </p>
+          <div className="mt-5 max-w-3xl border-l-2 border-red-700 pl-4 text-sm leading-6 text-stone-600 space-y-4">
+            <p>A fast-growing SaaS startup has reached an important turning point. After months of refining its product, the team is ready to show its website to prospective customers, partners, and early investors. Their engineering team has completed the application, but their release plan has hit a wall just before launch. They need someone who can take ownership of the deployment and turn a repository into a dependable public website. As a competitor brought in at the final hour, you have been asked to make that launch happen.</p>
+            <p>The team has shared its working project through their GitHub repository: <a className="font-semibold text-red-700 underline underline-offset-2" href="https://github.com/AnasDharar/demo" target="_blank" rel="noreferrer">github.com/AnasDharar/demo</a>. Study the project, prepare it for production, and deploy it on the Azure platform. Your result should be a publicly accessible website that a real visitor can open without credentials or a local development environment. Treat this as more than a quick upload: the startup is trusting you with its first public impression. Before submitting, visit the deployed page yourself and make sure the site is responding correctly. When the release is ready, paste the public Azure website link below.</p>
+          </div>
 
           {/* Verification Status Badge */}
           {participant.level1_completed && (

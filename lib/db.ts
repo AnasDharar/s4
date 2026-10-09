@@ -202,6 +202,34 @@ export async function updateParticipantLevel2(
   return updatedItem;
 }
 
+export async function updateParticipantLevel3(
+  userId: string,
+  completedAt: string
+): Promise<Participant | null> {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('participants')
+      .update({ level3_completed: true, level3_completed_at: completedAt, total_completed: 3 })
+      .eq('id', userId)
+      .select()
+      .single();
+    if (error) throw new Error('Unable to save round completion.');
+    return data as Participant;
+  }
+
+  const locals = getLocalParticipants();
+  const index = locals.findIndex(p => p.id === userId);
+  if (index === -1) return null;
+  locals[index] = {
+    ...locals[index],
+    level3_completed: true,
+    level3_completed_at: completedAt,
+    total_completed: 3,
+  };
+  saveLocalParticipants(locals);
+  return locals[index];
+}
+
 export async function addVerificationLog(log: Omit<VerificationLog, 'id' | 'created_at'>): Promise<VerificationLog> {
   const newLog: VerificationLog = {
     ...log,
@@ -228,6 +256,7 @@ export async function getLeaderboard(): Promise<Participant[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from('participants').select('*').order('total_completed', { ascending: false })
+      .order('level3_completed_at', { ascending: true, nullsFirst: false })
       .order('level2_completed_at', { ascending: true, nullsFirst: false })
       .order('level1_completed_at', { ascending: true, nullsFirst: false })
       .order('registered_at', { ascending: true });
@@ -239,18 +268,25 @@ export async function getLeaderboard(): Promise<Participant[]> {
 
   return list.sort((a, b) => {
     // 1. Total levels completed DESC
-    const countA = a.total_completed || (a.level2_completed ? 2 : a.level1_completed ? 1 : 0);
-    const countB = b.total_completed || (b.level2_completed ? 2 : b.level1_completed ? 1 : 0);
+    const countA = a.total_completed || (a.level3_completed ? 3 : a.level2_completed ? 2 : a.level1_completed ? 1 : 0);
+    const countB = b.total_completed || (b.level3_completed ? 3 : b.level2_completed ? 2 : b.level1_completed ? 1 : 0);
     if (countA !== countB) return countB - countA;
 
-    // 2. Level 2 completion timestamp ASC
+    // 2. Level 3 completion timestamp ASC
+    if (a.level3_completed && b.level3_completed) {
+      const t3A = a.level3_completed_at ? new Date(a.level3_completed_at).getTime() : Infinity;
+      const t3B = b.level3_completed_at ? new Date(b.level3_completed_at).getTime() : Infinity;
+      if (t3A !== t3B) return t3A - t3B;
+    }
+
+    // 3. Level 2 completion timestamp ASC
     if (a.level2_completed && b.level2_completed) {
       const t2A = a.level2_completed_at ? new Date(a.level2_completed_at).getTime() : Infinity;
       const t2B = b.level2_completed_at ? new Date(b.level2_completed_at).getTime() : Infinity;
       if (t2A !== t2B) return t2A - t2B;
     }
 
-    // 3. Level 1 completion timestamp ASC
+    // 4. Level 1 completion timestamp ASC
     if (a.level1_completed && b.level1_completed) {
       const t1A = a.level1_completed_at ? new Date(a.level1_completed_at).getTime() : Infinity;
       const t1B = b.level1_completed_at ? new Date(b.level1_completed_at).getTime() : Infinity;

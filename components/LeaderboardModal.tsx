@@ -145,7 +145,7 @@ export default function LeaderboardModal({ onClose, currentUserId }: Leaderboard
                 filtered.map((item, idx) => {
                   const isCurrent = item.id === currentUserId;
                   const rank = idx + 1;
-                  const latestTimestamp = item.level2_completed_at || item.level1_completed_at;
+                  const latestTimestamp = item.level3_completed_at || item.level2_completed_at || item.level1_completed_at;
 
                   return (
                     <tr
@@ -210,6 +210,11 @@ export default function LeaderboardModal({ onClose, currentUserId }: Leaderboard
                           {item.level2_completed && (
                             <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold text-[9px]">
                               L2
+                            </span>
+                          )}
+                          {item.level3_completed && (
+                            <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded bg-red-500/20 border border-red-500/30 text-red-300 font-bold text-[9px]">
+                              L3
                             </span>
                           )}
                           {!item.level1_completed && !item.level2_completed && (

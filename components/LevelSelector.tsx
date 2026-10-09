@@ -8,6 +8,7 @@ interface LevelSelectorProps {
   setActiveLevel: (lvl: number) => void;
   level1Passed: boolean;
   level2Passed: boolean;
+  level3Passed: boolean;
 }
 
 export default function LevelSelector({
@@ -15,6 +16,7 @@ export default function LevelSelector({
   setActiveLevel,
   level1Passed,
   level2Passed,
+  level3Passed,
 }: LevelSelectorProps) {
   const levels = [
     {
@@ -33,9 +35,9 @@ export default function LevelSelector({
     },
     {
       id: 3,
-      title: 'Round 03: Final',
-      desc: 'The last brief will unlock soon.',
-      status: 'LOCKED',
+      title: 'Round 03: VM Deployment',
+      desc: 'Deploy Nginx on a public virtual machine.',
+      status: level3Passed ? 'COMPLETED' : level2Passed ? 'ACTIVE' : 'LOCKED',
       locked: !level2Passed,
     },
   ];
@@ -60,7 +62,7 @@ export default function LevelSelector({
           >
             {/* Status indicator */}
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono tracking-wider uppercase px-2 py-0.5 rounded bg-slate-800 text-blue-200">
+              <span className="text-sm border-2 font-semibold font-mono tracking-wider uppercase px-2 py-0.5 rounded text-black">
                 ROUND 0{lvl.id}
               </span>
 

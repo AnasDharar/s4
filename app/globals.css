@@ -43,7 +43,7 @@ body {
 @media (max-width: 640px) { .editorial-shell { padding: 0 16px; } .editorial-display { letter-spacing: -.04em; } }
 
 /* Re-skin the existing interaction components as one calm editorial system. */
-.editorial-page [class*="bg-slate-950"], .editorial-page [class*="bg-slate-900"] { background-color: var(--paper) !important; }
+.editorial-page [class*="bg-slate"] { background-color: var(--paper) !important; }
 .editorial-page [class*="text-white"], .editorial-page [class*="text-slate-"] { color: var(--ink) !important; }
 .editorial-page [class*="border-slate"], .editorial-page [class*="border-cyan"], .editorial-page [class*="border-indigo"] { border-color: var(--line) !important; }
 .editorial-page [class*="rounded-"] { border-radius: 0 !important; }
@@ -52,6 +52,7 @@ body {
 .editorial-page input { color: var(--ink) !important; }
 .editorial-page input::placeholder { color: #99958c !important; }
 .editorial-page .shadow-xl, .editorial-page .shadow-2xl, .editorial-page .shadow-lg { box-shadow: none !important; }
+.editorial-page .fieldwork-mark { color: var(--paper) !important; }
 .editorial-page .level-workbench > div:first-child { border: 1px solid var(--line) !important; background: var(--paper) !important; }
 .editorial-page .level-workbench > div:first-child h2 { color: var(--ink) !important; font-family: Impact, "Arial Narrow", sans-serif; font-size: clamp(42px, 6vw, 76px); letter-spacing: -.025em; line-height: .9; }
 .editorial-page .level-workbench .lg\:col-span-5 { display: none; }

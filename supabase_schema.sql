@@ -28,5 +28,11 @@ CREATE TABLE IF NOT EXISTS verification_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Additive migration for installations created from earlier versions.
+ALTER TABLE verification_logs ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1;
+ALTER TABLE verification_logs ADD COLUMN IF NOT EXISTS section_match BOOLEAN DEFAULT FALSE;
+ALTER TABLE verification_logs ADD COLUMN IF NOT EXISTS h3_match BOOLEAN DEFAULT FALSE;
+ALTER TABLE verification_logs ADD COLUMN IF NOT EXISTS hash_match BOOLEAN DEFAULT FALSE;
+
 -- Index for leaderboard queries
 CREATE INDEX IF NOT EXISTS idx_participants_leaderboard ON participants(level1_completed DESC, level1_completed_at ASC, registered_at ASC);

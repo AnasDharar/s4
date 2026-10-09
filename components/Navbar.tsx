@@ -49,7 +49,7 @@ export default function Navbar({
         
         {/* Brand */}
         <div className="flex items-center space-x-3">
-          <div className="flex h-8 w-8 items-center justify-center bg-[#11110f] text-white">
+          <div className="fieldwork-mark flex h-8 w-8 items-center justify-center bg-[#11110f] text-[#f6f4ef]">
             <Flag className="w-4 h-4 fill-current" />
           </div>
           <div>
