@@ -150,9 +150,31 @@ export default function Level1Workbench({
           <p className="mt-2 text-sm text-slate-300 leading-relaxed">
             Share a public link to your page. It should include the two required elements below.
           </p>
-          <p className="mt-5 max-w-3xl border-l-2 border-red-700 pl-4 text-sm leading-6 text-stone-600">
-            Your task is to publish a simple public webpage for this round. Create a page that feels intentional and complete, rather than a bare test page. Include a clear opening section that introduces the page to a visitor. Add the required markup in the correct place within your page structure. The content and visual direction are yours to decide. Make sure the final link is publicly reachable before you submit it. Once you are satisfied with the result, submit the live URL below.
+          <p className="mt-4 max-w-3xl border-l-2 border-cyan-500/60 pl-4 text-sm leading-6 text-slate-300">
+            Your task is to publish a simple public webpage for this round. Use the repository at{' '}
+            <a
+              href="https://github.com/AnasDharar/demo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline underline-offset-2 font-mono font-semibold inline-flex items-center gap-1"
+            >
+              https://github.com/AnasDharar/demo
+              <ExternalLink className="w-3.5 h-3.5 inline" />
+            </a>{' '}
+            as your codebase. Add the required markup in the correct place within your page structure, deploy it to <code className="text-cyan-300 font-mono font-bold">Azure Static Web Apps</code>, and ensure the live link is publicly reachable. Once satisfied with the result, submit your live URL below.
           </p>
+
+          <div className="mt-4">
+            <a
+              href="https://github.com/AnasDharar/demo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-slate-950/80 hover:bg-slate-900 border border-cyan-500/30 hover:border-cyan-400/60 text-cyan-300 hover:text-white text-xs font-mono transition shadow-lg"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Repository: https://github.com/AnasDharar/demo</span>
+            </a>
+          </div>
 
           {/* Verification Status Badge */}
           {participant.level1_completed && (
