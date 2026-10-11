@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Level 1 must be completed before attempting Level 2.' }, { status: 400 });
     }
 
-    // Perform image verification against master MLSC LOGO image
+    // Perform verification against target scenario image
     const result = await verifyTargetImage(imageUrl.trim());
     const timestamp = new Date().toISOString();
 

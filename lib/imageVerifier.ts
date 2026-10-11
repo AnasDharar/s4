@@ -1,8 +1,7 @@
 import crypto from 'crypto';
 
-export const MASTER_TARGET_IMAGE_URL = 'https://yrzpapmgpqpjofbhycbw.supabase.co/storage/v1/object/public/ctf-assets/MLSC%20LOGO.jpeg';
-export const MASTER_TARGET_IMAGE_HASH = 'a74a8604f4f8ef07dcd1d4a10030fda7c1d84724668fac8fd59a753abc91a04c';
-export const MASTER_TARGET_BYTE_SIZE = 57598;
+// The correct answer for Level 2 is GZRS
+export const MASTER_TARGET_IMAGE_URL = 'https://yrzpapmgpqpjofbhycbw.supabase.co/storage/v1/object/public/ctf-assets/GZRS.png';
 
 export interface ImageVerificationResult {
   success: boolean;
@@ -16,22 +15,25 @@ export interface ImageVerificationResult {
   statusCode?: number;
 }
 
-// In-memory cache for master target hash
-let cachedMasterHash: string = MASTER_TARGET_IMAGE_HASH;
+const GENERIC_FAILURE_MESSAGE = 'Verification failed. Please read the challenge instructions carefully and ensure your deployment meets all requirements.';
+
+// Cache the master image hash at runtime (computed on first verification)
+let cachedMasterHash: string = '';
 
 async function getMasterImageHash(): Promise<string> {
   if (cachedMasterHash) return cachedMasterHash;
   try {
-    const res = await fetch(MASTER_TARGET_IMAGE_URL, { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(MASTER_TARGET_IMAGE_URL, { signal: AbortSignal.timeout(10000) });
     if (res.ok) {
       const buffer = Buffer.from(await res.arrayBuffer());
       cachedMasterHash = crypto.createHash('sha256').update(buffer).digest('hex');
+      console.log('[Level2] Master image hash computed:', cachedMasterHash);
       return cachedMasterHash;
     }
   } catch (err) {
-    console.warn('Could not refresh master target image hash:', err);
+    console.warn('Could not fetch master target image for hashing:', err);
   }
-  return MASTER_TARGET_IMAGE_HASH;
+  return '';
 }
 
 export async function verifyTargetImage(userImageUrl: string): Promise<ImageVerificationResult> {
@@ -49,17 +51,47 @@ export async function verifyTargetImage(userImageUrl: string): Promise<ImageVeri
       contentType: null,
       byteSize: 0,
       sha256Hash: '',
-      masterHash: MASTER_TARGET_IMAGE_HASH,
+      masterHash: '',
       hashMatched: false,
-      error: 'Invalid Image URL format. Please provide a valid HTTP or HTTPS link.'
+      error: GENERIC_FAILURE_MESSAGE
+    };
+  }
+
+  // Domain check: Must be on blob.core.windows.net (or localhost for local testing)
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isAzureBlob = hostname.endsWith('.blob.core.windows.net') || hostname === 'blob.core.windows.net';
+  const isLocalTest = hostname === 'localhost' || hostname === '127.0.0.1';
+
+  if (!isAzureBlob && !isLocalTest) {
+    return {
+      success: false,
+      isImageMime: false,
+      contentType: null,
+      byteSize: 0,
+      sha256Hash: '',
+      masterHash: '',
+      hashMatched: false,
+      error: GENERIC_FAILURE_MESSAGE
     };
   }
 
   try {
-    // 1. Fetch Master Target Hash
+    // Get master image hash (computed from GZRS.png on first call, then cached)
     const expectedHash = await getMasterImageHash();
+    if (!expectedHash) {
+      console.error('[Level2] Failed to compute master image hash — cannot verify.');
+      return {
+        success: false,
+        isImageMime: false,
+        contentType: null,
+        byteSize: 0,
+        sha256Hash: '',
+        masterHash: '',
+        hashMatched: false,
+        error: GENERIC_FAILURE_MESSAGE
+      };
+    }
 
-    // 2. Fetch User's Deployed Azure Image
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
 
@@ -80,10 +112,10 @@ export async function verifyTargetImage(userImageUrl: string): Promise<ImageVeri
         contentType: null,
         byteSize: 0,
         sha256Hash: '',
-        masterHash: expectedHash,
+        masterHash: '',
         hashMatched: false,
         statusCode: res.status,
-        error: `HTTP request failed with status code ${res.status} (${res.statusText})`
+        error: GENERIC_FAILURE_MESSAGE
       };
     }
 
@@ -102,20 +134,6 @@ export async function verifyTargetImage(userImageUrl: string): Promise<ImageVeri
 
     const success = isImageMime && hashMatched;
 
-    let error = undefined;
-    if (!success) {
-      const failures: string[] = [];
-      if (!isImageMime) {
-        failures.push(`Invalid Content-Type "${contentType}". Expected an image format.`);
-      }
-      if (!hashMatched) {
-        failures.push(
-          `Image SHA-256 hash mismatch! Uploaded image hash (${userSha256Hash.substring(0, 16)}...) does not match master MLSC LOGO image (${expectedHash.substring(0, 16)}...).`
-        );
-      }
-      error = failures.join(' | ');
-    }
-
     return {
       success,
       isImageMime,
@@ -124,21 +142,20 @@ export async function verifyTargetImage(userImageUrl: string): Promise<ImageVeri
       sha256Hash: userSha256Hash,
       masterHash: expectedHash,
       hashMatched,
-      error,
+      error: success ? undefined : GENERIC_FAILURE_MESSAGE,
       statusCode: res.status
     };
 
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
+  } catch {
     return {
       success: false,
       isImageMime: false,
       contentType: null,
       byteSize: 0,
       sha256Hash: '',
-      masterHash: MASTER_TARGET_IMAGE_HASH,
+      masterHash: '',
       hashMatched: false,
-      error: `Failed to fetch target image link: ${errorMsg}`
+      error: GENERIC_FAILURE_MESSAGE
     };
   }
 }

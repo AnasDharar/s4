@@ -44,10 +44,10 @@ export default function LogsModal({ userId, onClose }: LogsModalProps) {
             </div>
             <div>
               <h2 className="text-lg font-bold text-white uppercase tracking-wider">
-                Verification Audit Logs
+                Submission Verification Logs
               </h2>
               <p className="text-xs text-slate-400 font-mono">
-                History of all website signature scan attempts
+                History of participant deployment verification attempts
               </p>
             </div>
           </div>
@@ -84,9 +84,6 @@ export default function LogsModal({ userId, onClose }: LogsModalProps) {
             </div>
           ) : (
             logs.map(log => {
-              const isSectionMatched = log.section_match ?? log.eyebrow_match ?? false;
-              const isH3Matched = log.h3_match ?? log.title_match ?? false;
-
               return (
                 <div
                   key={log.id}
@@ -98,43 +95,33 @@ export default function LogsModal({ userId, onClose }: LogsModalProps) {
                 >
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center space-x-2 font-mono text-slate-300">
-                      <Globe className="w-4 h-4 text-cyan-400" />
+                      <Globe className="w-4 h-4 text-cyan-400 shrink-0" />
                       <span className="font-semibold text-white truncate max-w-md">{log.url}</span>
                     </div>
-                    <span className="text-slate-500 font-mono text-[11px]">
+                    <span className="text-slate-500 font-mono text-[11px] shrink-0 ml-2">
                       {new Date(log.created_at).toLocaleString()}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-xs font-mono">
-                    <div className="flex items-center space-x-4">
-                      <span className="flex items-center gap-1">
-                        {isSectionMatched ? (
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5 text-red-400" />
-                        )}
-                        <span className={isSectionMatched ? 'text-emerald-300' : 'text-slate-400'}>
-                          &lt;section id=&quot;hero&quot;&gt;
+                    <div className="flex items-center space-x-2">
+                      {log.status === 'SUCCESS' ? (
+                        <span className="flex items-center gap-1.5 text-emerald-400">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Verification Passed</span>
                         </span>
-                      </span>
-
-                      <span className="flex items-center gap-1">
-                        {isH3Matched ? (
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <XCircle className="w-3.5 h-3.5 text-red-400" />
-                        )}
-                        <span className={isH3Matched ? 'text-emerald-300' : 'text-slate-400'}>
-                          &lt;h3 id=&quot;enterprise-security&quot;&gt;
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-red-400">
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>Verification Failed</span>
                         </span>
-                      </span>
+                      )}
                     </div>
 
                     <div>
                       {log.status === 'SUCCESS' ? (
                         <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px]">
-                          SUCCESS
+                          PASSED
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-bold text-[10px]">
@@ -145,7 +132,7 @@ export default function LogsModal({ userId, onClose }: LogsModalProps) {
                   </div>
 
                   {log.error_message && (
-                    <div className="text-[11px] font-mono text-red-300 bg-red-950/40 p-2 rounded border border-red-900/40">
+                    <div className="text-[11px] font-mono text-slate-400 bg-slate-900/60 p-2 rounded border border-slate-800">
                       {log.error_message}
                     </div>
                   )}

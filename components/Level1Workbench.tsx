@@ -14,18 +14,20 @@ import {
   Sparkles,
   Zap,
   Award,
-  AlertTriangle,
+  ArrowRight,
 } from 'lucide-react';
 import { Participant } from '@/lib/db';
 
 interface Level1WorkbenchProps {
   participant: Participant;
   onParticipantUpdated: (updated: Participant) => void;
+  onNavigateToLevel2?: () => void;
 }
 
 export default function Level1Workbench({
   participant,
   onParticipantUpdated,
+  onNavigateToLevel2,
 }: Level1WorkbenchProps) {
   const [urlInput, setUrlInput] = useState(participant.level1_url || '');
   const [scanning, setScanning] = useState(false);
@@ -34,18 +36,12 @@ export default function Level1Workbench({
 
   const [verifyResult, setVerifyResult] = useState<{
     success?: boolean;
-    sectionMatched?: boolean;
-    h3Matched?: boolean;
-    sectionFoundContent?: string | null;
-    h3FoundContent?: string | null;
     error?: string | null;
     completedAt?: string | null;
   } | null>(
     participant.level1_completed
       ? {
           success: true,
-          sectionMatched: true,
-          h3Matched: true,
           completedAt: participant.level1_completed_at,
         }
       : null
@@ -71,14 +67,14 @@ export default function Level1Workbench({
     setTimeout(() => {
       setScanSteps(prev => [
         ...prev,
-        'Scanning DOM elements for <section id="hero"> tag anywhere in HTML...',
+        'Scanning for required elements in HTML...',
       ]);
     }, 400);
 
     setTimeout(() => {
       setScanSteps(prev => [
         ...prev,
-        'Scanning DOM elements for <h3 id="enterprise-security"> tag anywhere in HTML...',
+        'Validating submission criteria...',
       ]);
     }, 800);
 
@@ -97,8 +93,8 @@ export default function Level1Workbench({
       setScanSteps(prev => [
         ...prev,
         data.success
-          ? 'SUCCESS: Both <section id="hero"> and <h3 id="enterprise-security"> tags verified!'
-          : `FAILED: ${data.error || 'Verification check failed'}`,
+          ? 'SUCCESS: All required elements verified!'
+          : 'FAILED: Verification check failed',
       ]);
 
       setVerifyResult(data);
@@ -113,13 +109,10 @@ export default function Level1Workbench({
           colors: ['#38bdf8', '#818cf8', '#34d399', '#f59e0b'],
         });
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+    } catch {
       setVerifyResult({
         success: false,
-        sectionMatched: false,
-        h3Matched: false,
-        error: `Network / Server error: ${msg}`,
+        error: 'Verification failed. Please read the question properly and try again.',
       });
     } finally {
       setScanning(false);
@@ -157,16 +150,26 @@ export default function Level1Workbench({
           <p className="mt-2 text-sm text-slate-300 leading-relaxed">
             Share a public link to your page. It should include the two required elements below.
           </p>
-          <div className="mt-5 max-w-3xl border-l-2 border-red-700 pl-4 text-sm leading-6 text-stone-600 space-y-4">
-            <p>A fast-growing SaaS startup has reached an important turning point. After months of refining its product, the team is ready to show its website to prospective customers, partners, and early investors. Their engineering team has completed the application, but their release plan has hit a wall just before launch. They need someone who can take ownership of the deployment and turn a repository into a dependable public website. As a competitor brought in at the final hour, you have been asked to make that launch happen.</p>
-            <p>The team has shared its working project through their GitHub repository: <a className="font-semibold text-red-700 underline underline-offset-2" href="https://github.com/AnasDharar/demo" target="_blank" rel="noreferrer">github.com/AnasDharar/demo</a>. Study the project, prepare it for production, and deploy it on the Azure platform. Your result should be a publicly accessible website that a real visitor can open without credentials or a local development environment. Treat this as more than a quick upload: the startup is trusting you with its first public impression. Before submitting, visit the deployed page yourself and make sure the site is responding correctly. When the release is ready, paste the public Azure website link below.</p>
-          </div>
+          <p className="mt-5 max-w-3xl border-l-2 border-red-700 pl-4 text-sm leading-6 text-stone-600">
+            Your task is to publish a simple public webpage for this round. Create a page that feels intentional and complete, rather than a bare test page. Include a clear opening section that introduces the page to a visitor. Add the required markup in the correct place within your page structure. The content and visual direction are yours to decide. Make sure the final link is publicly reachable before you submit it. Once you are satisfied with the result, submit the live URL below.
+          </p>
 
           {/* Verification Status Badge */}
           {participant.level1_completed && (
-            <div className="mt-4 inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-semibold text-sm">
-              <Award className="w-5 h-5 text-emerald-400 animate-bounce" />
-              <span>LEVEL 1 VERIFIED & PASSED!</span>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-semibold text-sm">
+                <Award className="w-5 h-5 text-emerald-400 animate-bounce" />
+                <span>LEVEL 1 VERIFIED & PASSED!</span>
+              </div>
+              {onNavigateToLevel2 && (
+                <button
+                  onClick={onNavigateToLevel2}
+                  className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 font-semibold text-sm transition"
+                >
+                  <span>Go to Level 2</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -283,7 +286,7 @@ export default function Level1Workbench({
                 <input
                   type="url"
                   required
-                  placeholder="https://your-website-link.com"
+                  placeholder="https://your-app.azurewebsites.net"
                   value={urlInput}
                   onChange={e => setUrlInput(e.target.value)}
                   className="w-full bg-slate-950/90 border border-slate-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-slate-500 outline-none font-mono transition"
@@ -303,7 +306,7 @@ export default function Level1Workbench({
                 ) : (
                   <>
                     <Search className="w-4 h-4" />
-              <span>Submit website</span>
+                    <span>Submit website</span>
                   </>
                 )}
               </button>
@@ -338,98 +341,54 @@ export default function Level1Workbench({
               </div>
             )}
 
-            {/* Verification Result Breakdown Card */}
+            {/* Verification Result Card */}
             {verifyResult && (
               <div
-                className={`p-5 rounded-2xl border ${
+                className={`p-6 rounded-2xl border ${
                   verifyResult.success
                     ? 'bg-emerald-950/40 border-emerald-500/40'
                     : 'bg-red-950/40 border-red-500/40'
                 } space-y-4`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    {verifyResult.success ? (
-                      <CheckCircle2 className="w-8 h-8 text-emerald-400 shrink-0" />
-                    ) : (
-                      <XCircle className="w-8 h-8 text-red-400 shrink-0" />
-                    )}
-                    <div>
-                      <h4
-                        className={`text-lg font-bold uppercase tracking-wide ${
-                          verifyResult.success ? 'text-emerald-300' : 'text-red-300'
-                        }`}
-                      >
-                        {verifyResult.success
-                          ? 'LEVEL 1 VERIFICATION PASSED!'
-                          : 'VERIFICATION FAILED'}
-                      </h4>
-                      <p className="text-xs text-slate-300 mt-0.5">
-                        {verifyResult.success
-                          ? 'Both required HTML elements were successfully found anywhere in the webpage DOM.'
-                          : 'One or more required HTML tags were missing.'}
-                      </p>
-                    </div>
+                <div className="flex items-start space-x-3.5">
+                  {verifyResult.success ? (
+                    <CheckCircle2 className="w-7 h-7 text-emerald-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <XCircle className="w-7 h-7 text-red-400 shrink-0 mt-0.5" />
+                  )}
+                  <div className="space-y-1">
+                    <h4
+                      className={`text-lg font-bold uppercase tracking-wide ${
+                        verifyResult.success ? 'text-emerald-300' : 'text-red-300'
+                      }`}
+                    >
+                      {verifyResult.success
+                        ? 'VERIFICATION PASSED!'
+                        : 'VERIFICATION FAILED'}
+                    </h4>
+                    <p className="text-sm text-slate-300 leading-relaxed">
+                      {verifyResult.success
+                        ? 'Verification passed! Move to the next question by clicking on Level 2 on top.'
+                        : 'Verification failed. Please read the question properly and try again.'}
+                    </p>
                   </div>
                 </div>
 
-                {/* Individual Checklist Items */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-800/60">
-                  {/* Check 1 */}
-                  <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-mono">&lt;section id=&quot;hero&quot;&gt;</span>
-                      {verifyResult.sectionMatched ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          MATCHED
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
-                          FAILED
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[11px] text-slate-300 font-mono">
-                      Selector: <code className="text-cyan-300">section#hero</code>
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-mono truncate">
-                      Status: {verifyResult.sectionFoundContent || (verifyResult.sectionMatched ? 'Found' : 'Not found')}
-                    </div>
-                  </div>
-
-                  {/* Check 2 */}
-                  <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-mono">&lt;h3 id=&quot;enterprise-security&quot;&gt;</span>
-                      {verifyResult.h3Matched ? (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          MATCHED
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/30">
-                          FAILED
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[11px] text-slate-300 font-mono">
-                      Selector: <code className="text-cyan-300">h3#enterprise-security</code>
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-mono truncate">
-                      Status: {verifyResult.h3FoundContent || (verifyResult.h3Matched ? 'Found' : 'Not found')}
-                    </div>
-                  </div>
-                </div>
-
-                {verifyResult.error && (
-                  <div className="p-3 rounded-xl bg-red-950/80 border border-red-800/60 text-xs font-mono text-red-300 flex items-start gap-2">
-                    <AlertTriangle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
-                    <span>{verifyResult.error}</span>
+                {verifyResult.success && onNavigateToLevel2 && (
+                  <div className="pt-2 border-t border-emerald-500/20">
+                    <button
+                      onClick={onNavigateToLevel2}
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-950 bg-emerald-400 hover:bg-emerald-300 transition flex items-center justify-center gap-1.5"
+                    >
+                      <span>Proceed to Level 2</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
                   </div>
                 )}
 
                 {verifyResult.completedAt && (
-                  <div className="text-right text-[11px] font-mono text-slate-400">
-                    Timestamp Noted:{' '}
+                  <div className="text-right text-[11px] font-mono text-slate-400 pt-1">
+                    Completed At:{' '}
                     <span className="text-emerald-300">
                       {new Date(verifyResult.completedAt).toLocaleString()}
                     </span>

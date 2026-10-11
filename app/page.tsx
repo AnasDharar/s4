@@ -7,18 +7,12 @@ import LevelSelector from '@/components/LevelSelector';
 import Level1Workbench from '@/components/Level1Workbench';
 import Level2Workbench from '@/components/Level2Workbench';
 import Level3Workbench from '@/components/Level3Workbench';
-import LeaderboardModal from '@/components/LeaderboardModal';
-import LogsModal from '@/components/LogsModal';
 import { Participant } from '@/lib/db';
 
 export default function Home() {
   const [participant, setParticipant] = useState<Participant | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeLevel, setActiveLevel] = useState<number>(1);
-
-  // Modals
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [showLogs, setShowLogs] = useState(false);
 
   // Load participant session from localStorage if present
   useEffect(() => {
@@ -80,8 +74,6 @@ export default function Home() {
       {/* Main Navbar */}
       <Navbar
         participant={participant}
-        onOpenLeaderboard={() => setShowLeaderboard(true)}
-        onOpenLogs={() => setShowLogs(true)}
         onLogout={handleLogout}
       />
 
@@ -105,6 +97,7 @@ export default function Home() {
               <Level1Workbench
                 participant={participant}
                 onParticipantUpdated={handleParticipantUpdated}
+                onNavigateToLevel2={() => setActiveLevel(2)}
               />
             )}
 
@@ -113,6 +106,7 @@ export default function Home() {
               <Level2Workbench
                 participant={participant}
                 onParticipantUpdated={handleParticipantUpdated}
+                onNavigateToLevel3={() => setActiveLevel(3)}
               />
             )}
 
@@ -129,22 +123,6 @@ export default function Home() {
         )}
 
       </main>
-
-      {/* Leaderboard Modal */}
-      {showLeaderboard && (
-        <LeaderboardModal
-          onClose={() => setShowLeaderboard(false)}
-          currentUserId={participant?.id}
-        />
-      )}
-
-      {/* Verification Logs Modal */}
-      {showLogs && participant && (
-        <LogsModal
-          userId={participant.id}
-          onClose={() => setShowLogs(false)}
-        />
-      )}
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-slate-900 bg-slate-950/80 py-4 text-center text-xs font-mono text-slate-500">

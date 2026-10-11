@@ -1,20 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Trophy, Clock, History, LogOut, ShieldCheck, Flag } from 'lucide-react';
+import { Clock, LogOut, ShieldCheck, Flag } from 'lucide-react';
 import { Participant } from '@/lib/db';
 
 interface NavbarProps {
   participant: Participant | null;
-  onOpenLeaderboard: () => void;
-  onOpenLogs: () => void;
   onLogout: () => void;
 }
 
 export default function Navbar({
   participant,
-  onOpenLeaderboard,
-  onOpenLogs,
   onLogout,
 }: NavbarProps) {
   const [elapsed, setElapsed] = useState<string>('00:00:00');
@@ -89,32 +85,13 @@ export default function Navbar({
         {/* Action Buttons */}
         <div className="flex items-center space-x-2 sm:space-x-3">
           {participant && (
-            <>
-              <button
-                onClick={onOpenLogs}
-                title="Verification History"
-                className="p-2 sm:px-3 sm:py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs text-slate-300 hover:text-white transition flex items-center gap-1.5"
-              >
-                <History className="w-4 h-4 text-slate-400" />
-                <span className="hidden sm:inline font-mono">Logs</span>
-              </button>
-
-              <button
-                onClick={onOpenLeaderboard}
-                className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-500/20 hover:from-amber-500/30 border border-amber-500/40 text-xs font-semibold text-amber-300 transition flex items-center gap-1.5"
-              >
-                <Trophy className="w-4 h-4 text-amber-400" />
-                <span>Leaderboard</span>
-              </button>
-
-              <button
-                onClick={onLogout}
-                title="Switch Participant"
-                className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-red-400 transition border border-slate-800"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </>
+            <button
+              onClick={onLogout}
+              title="Switch Participant"
+              className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-red-400 transition border border-slate-800"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           )}
         </div>
 

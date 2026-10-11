@@ -73,7 +73,7 @@ export default function RegisterModal({ onRegisterSuccess }: RegisterModalProps)
           <p className="flex items-center text-cyan-300 font-semibold mb-1">
             <Sparkles className="w-4 h-4 mr-1 text-cyan-400" /> How it works
           </p>
-          Start with the first round, complete each brief, and follow your progress on the leaderboard.
+          Start with the first round, complete each brief, and advance through the levels.
         </div>
 
         {error && (

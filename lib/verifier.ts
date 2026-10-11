@@ -10,6 +10,8 @@ export interface VerificationResult {
   statusCode?: number;
 }
 
+const GENERIC_FAILURE_MESSAGE = 'Verification failed. Please read the challenge instructions carefully and ensure your deployment meets all requirements.';
+
 export async function verifyWebsite(targetUrl: string): Promise<VerificationResult> {
   // Normalize URL
   let parsedUrl: URL;
@@ -26,7 +28,23 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
       h3Matched: false,
       sectionFoundContent: null,
       h3FoundContent: null,
-      error: 'Invalid URL format. Please provide a valid HTTP or HTTPS website link.'
+      error: GENERIC_FAILURE_MESSAGE
+    };
+  }
+
+  // Domain check: Must be on azurewebsites.net (or localhost for local testing)
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const isAzure = hostname.endsWith('.azurewebsites.net') || hostname === 'azurewebsites.net';
+  const isLocalTest = hostname === 'localhost' || hostname === '127.0.0.1';
+
+  if (!isAzure && !isLocalTest) {
+    return {
+      success: false,
+      sectionMatched: false,
+      h3Matched: false,
+      sectionFoundContent: null,
+      h3FoundContent: null,
+      error: GENERIC_FAILURE_MESSAGE
     };
   }
 
@@ -52,7 +70,7 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
         sectionFoundContent: null,
         h3FoundContent: null,
         statusCode: res.status,
-        error: `HTTP request failed with status code ${res.status} (${res.statusText})`
+        error: GENERIC_FAILURE_MESSAGE
       };
     }
 
@@ -66,7 +84,7 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
     $('section#hero, section[id="hero"]').each((_, el) => {
       sectionMatched = true;
       const text = $(el).text().trim();
-      sectionFoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'section#hero found';
+      sectionFoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'present';
     });
 
     if (!sectionMatched) {
@@ -75,9 +93,7 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
         if (tagName === 'section') {
           sectionMatched = true;
           const text = $(el).text().trim();
-          sectionFoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'section#hero found';
-        } else {
-          sectionFoundContent = `<${tagName} id="hero"> found (expected <section id="hero">)`;
+          sectionFoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'present';
         }
       });
     }
@@ -89,7 +105,7 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
     $('h3#enterprise-security, h3[id="enterprise-security"]').each((_, el) => {
       h3Matched = true;
       const text = $(el).text().trim();
-      h3FoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'h3#enterprise-security found';
+      h3FoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'present';
     });
 
     if (!h3Matched) {
@@ -98,34 +114,12 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
         if (tagName === 'h3') {
           h3Matched = true;
           const text = $(el).text().trim();
-          h3FoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'h3#enterprise-security found';
-        } else {
-          h3FoundContent = `<${tagName} id="enterprise-security"> found (expected <h3 id="enterprise-security">)`;
+          h3FoundContent = text ? (text.length > 60 ? text.substring(0, 60) + '...' : text) : 'present';
         }
       });
     }
 
     const success = sectionMatched && h3Matched;
-
-    let error = undefined;
-    if (!success) {
-      const failures: string[] = [];
-      if (!sectionMatched) {
-        failures.push(
-          sectionFoundContent
-            ? `Found element with id="hero" but it is not a <section> tag (${sectionFoundContent})`
-            : `Missing <section id="hero"> element anywhere in HTML`
-        );
-      }
-      if (!h3Matched) {
-        failures.push(
-          h3FoundContent
-            ? `Found element with id="enterprise-security" but it is not an <h3> tag (${h3FoundContent})`
-            : `Missing <h3 id="enterprise-security"> element anywhere in HTML`
-        );
-      }
-      error = failures.join(' | ');
-    }
 
     return {
       success,
@@ -133,19 +127,18 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
       h3Matched,
       sectionFoundContent,
       h3FoundContent,
-      error,
+      error: success ? undefined : GENERIC_FAILURE_MESSAGE,
       statusCode: res.status
     };
 
-  } catch (err: unknown) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
+  } catch {
     return {
       success: false,
       sectionMatched: false,
       h3Matched: false,
       sectionFoundContent: null,
       h3FoundContent: null,
-      error: `Failed to fetch target website: ${errorMsg}`
+      error: GENERIC_FAILURE_MESSAGE
     };
   }
 }
