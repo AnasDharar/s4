@@ -32,9 +32,9 @@ export async function verifyWebsite(targetUrl: string): Promise<VerificationResu
     };
   }
 
-  // Domain check: Must be on azurewebsites.net (or localhost for local testing)
+  // Domain check: Must be on azurestaticapps.net (or localhost for local testing)
   const hostname = parsedUrl.hostname.toLowerCase();
-  const isAzure = hostname.endsWith('.azurewebsites.net') || hostname === 'azurewebsites.net';
+  const isAzure = hostname.endsWith('.azurestaticapps.net') || hostname === 'azurestaticapps.net';
   const isLocalTest = hostname === 'localhost' || hostname === '127.0.0.1';
 
   if (!isAzure && !isLocalTest) {

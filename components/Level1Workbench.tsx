@@ -286,7 +286,7 @@ export default function Level1Workbench({
                 <input
                   type="url"
                   required
-                  placeholder="https://your-app.azurewebsites.net"
+                  placeholder="https://your-app.azurestaticapps.net"
                   value={urlInput}
                   onChange={e => setUrlInput(e.target.value)}
                   className="w-full bg-slate-950/90 border border-slate-700 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 rounded-xl pl-11 pr-4 py-3 text-sm text-white placeholder-slate-500 outline-none font-mono transition"
