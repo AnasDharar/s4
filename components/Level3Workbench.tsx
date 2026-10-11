@@ -1,5 +1,6 @@
 'use client';
 
+
 import { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { CheckCircle2, Server, XCircle } from 'lucide-react';
